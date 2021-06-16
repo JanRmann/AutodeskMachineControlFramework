@@ -1158,6 +1158,30 @@ LibMCDriver_MarlinResult libmcdriver_marlin_driver_marlin_poweroff(LibMCDriver_M
 	}
 }
 
+LibMCDriver_MarlinResult libmcdriver_marlin_driver_marlin_disablesteppers(LibMCDriver_Marlin_Driver_Marlin pDriver_Marlin)
+{
+	IBase* pIBaseClass = (IBase *)pDriver_Marlin;
+
+	try {
+		IDriver_Marlin* pIDriver_Marlin = dynamic_cast<IDriver_Marlin*>(pIBaseClass);
+		if (!pIDriver_Marlin)
+			throw ELibMCDriver_MarlinInterfaceException(LIBMCDRIVER_MARLIN_ERROR_INVALIDCAST);
+		
+		pIDriver_Marlin->DisableSteppers();
+
+		return LIBMCDRIVER_MARLIN_SUCCESS;
+	}
+	catch (ELibMCDriver_MarlinInterfaceException & Exception) {
+		return handleLibMCDriver_MarlinException(pIBaseClass, Exception);
+	}
+	catch (std::exception & StdException) {
+		return handleStdException(pIBaseClass, StdException);
+	}
+	catch (...) {
+		return handleUnhandledException(pIBaseClass);
+	}
+}
+
 
 
 /*************************************************************************************************************************
@@ -1249,6 +1273,8 @@ LibMCDriver_MarlinResult LibMCDriver_Marlin::Impl::LibMCDriver_Marlin_GetProcAdd
 		*ppProcAddress = (void*) &libmcdriver_marlin_driver_marlin_stopidlehold;
 	if (sProcName == "libmcdriver_marlin_driver_marlin_poweroff") 
 		*ppProcAddress = (void*) &libmcdriver_marlin_driver_marlin_poweroff;
+	if (sProcName == "libmcdriver_marlin_driver_marlin_disablesteppers") 
+		*ppProcAddress = (void*) &libmcdriver_marlin_driver_marlin_disablesteppers;
 	if (sProcName == "libmcdriver_marlin_getversion") 
 		*ppProcAddress = (void*) &libmcdriver_marlin_getversion;
 	if (sProcName == "libmcdriver_marlin_getlasterror") 

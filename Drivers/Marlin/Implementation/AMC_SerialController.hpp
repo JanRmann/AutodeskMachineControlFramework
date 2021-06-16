@@ -67,6 +67,7 @@ namespace AMC {
 		virtual void extruderDoExtrude(double dE, double dSpeedInMMperSecond) = 0;
 		virtual void setAbsoluteExtrusion(bool bAbsolute) = 0;
 
+		virtual void disableSteppers() = 0;
 		virtual void stopIdleHold() = 0;
 		virtual void powerOff() = 0;
 

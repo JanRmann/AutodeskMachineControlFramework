@@ -445,6 +445,14 @@ LIBMCDRIVER_MARLIN_DECLSPEC LibMCDriver_MarlinResult libmcdriver_marlin_driver_m
 */
 LIBMCDRIVER_MARLIN_DECLSPEC LibMCDriver_MarlinResult libmcdriver_marlin_driver_marlin_poweroff(LibMCDriver_Marlin_Driver_Marlin pDriver_Marlin);
 
+/**
+* Disables all stepper motors.
+*
+* @param[in] pDriver_Marlin - Driver_Marlin instance.
+* @return error code or 0 (success)
+*/
+LIBMCDRIVER_MARLIN_DECLSPEC LibMCDriver_MarlinResult libmcdriver_marlin_driver_marlin_disablesteppers(LibMCDriver_Marlin_Driver_Marlin pDriver_Marlin);
+
 /*************************************************************************************************************************
  Global functions
 **************************************************************************************************************************/

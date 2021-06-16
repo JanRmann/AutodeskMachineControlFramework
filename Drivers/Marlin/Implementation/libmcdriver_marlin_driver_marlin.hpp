@@ -116,6 +116,8 @@ public:
 
 	void QueryParameters() override;
 
+	void DisableSteppers() override;
+
 };
 
 } // namespace Impl

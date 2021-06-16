@@ -871,5 +871,10 @@ namespace AMC {
 		//std::cout << "EXTRUDEDOEXTRUDE:  " << sCommand.str() <<  std::endl;
 	}
 
+	void CSerialController_Marlin::disableSteppers()
+	{
+		sendCommand("M18");
+	}
+
 
 }

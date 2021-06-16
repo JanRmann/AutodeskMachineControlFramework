@@ -528,6 +528,11 @@ public:
 	*/
 	virtual void PowerOff() = 0;
 
+	/**
+	* IDriver_Marlin::DisableSteppers - Disables all stepper motors.
+	*/
+	virtual void DisableSteppers() = 0;
+
 };
 
 typedef IBaseSharedPtr<IDriver_Marlin> PIDriver_Marlin;

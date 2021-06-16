@@ -394,6 +394,7 @@ public:
 	inline void SetAbsoluteExtrusion(const bool bAbsolute);
 	inline void StopIdleHold();
 	inline void PowerOff();
+	inline void DisableSteppers();
 };
 	
 	/**
@@ -555,6 +556,7 @@ public:
 		pWrapperTable->m_Driver_Marlin_SetAbsoluteExtrusion = nullptr;
 		pWrapperTable->m_Driver_Marlin_StopIdleHold = nullptr;
 		pWrapperTable->m_Driver_Marlin_PowerOff = nullptr;
+		pWrapperTable->m_Driver_Marlin_DisableSteppers = nullptr;
 		pWrapperTable->m_GetVersion = nullptr;
 		pWrapperTable->m_GetLastError = nullptr;
 		pWrapperTable->m_ReleaseInstance = nullptr;
@@ -953,6 +955,15 @@ public:
 			return LIBMCDRIVER_MARLIN_ERROR_COULDNOTFINDLIBRARYEXPORT;
 		
 		#ifdef _WIN32
+		pWrapperTable->m_Driver_Marlin_DisableSteppers = (PLibMCDriver_MarlinDriver_Marlin_DisableSteppersPtr) GetProcAddress(hLibrary, "libmcdriver_marlin_driver_marlin_disablesteppers");
+		#else // _WIN32
+		pWrapperTable->m_Driver_Marlin_DisableSteppers = (PLibMCDriver_MarlinDriver_Marlin_DisableSteppersPtr) dlsym(hLibrary, "libmcdriver_marlin_driver_marlin_disablesteppers");
+		dlerror();
+		#endif // _WIN32
+		if (pWrapperTable->m_Driver_Marlin_DisableSteppers == nullptr)
+			return LIBMCDRIVER_MARLIN_ERROR_COULDNOTFINDLIBRARYEXPORT;
+		
+		#ifdef _WIN32
 		pWrapperTable->m_GetVersion = (PLibMCDriver_MarlinGetVersionPtr) GetProcAddress(hLibrary, "libmcdriver_marlin_getversion");
 		#else // _WIN32
 		pWrapperTable->m_GetVersion = (PLibMCDriver_MarlinGetVersionPtr) dlsym(hLibrary, "libmcdriver_marlin_getversion");
@@ -1181,6 +1192,10 @@ public:
 		
 		eLookupError = (*pLookup)("libmcdriver_marlin_driver_marlin_poweroff", (void**)&(pWrapperTable->m_Driver_Marlin_PowerOff));
 		if ( (eLookupError != 0) || (pWrapperTable->m_Driver_Marlin_PowerOff == nullptr) )
+			return LIBMCDRIVER_MARLIN_ERROR_COULDNOTFINDLIBRARYEXPORT;
+		
+		eLookupError = (*pLookup)("libmcdriver_marlin_driver_marlin_disablesteppers", (void**)&(pWrapperTable->m_Driver_Marlin_DisableSteppers));
+		if ( (eLookupError != 0) || (pWrapperTable->m_Driver_Marlin_DisableSteppers == nullptr) )
 			return LIBMCDRIVER_MARLIN_ERROR_COULDNOTFINDLIBRARYEXPORT;
 		
 		eLookupError = (*pLookup)("libmcdriver_marlin_getversion", (void**)&(pWrapperTable->m_GetVersion));
@@ -1630,6 +1645,14 @@ public:
 	void CDriver_Marlin::PowerOff()
 	{
 		CheckError(m_pWrapper->m_WrapperTable.m_Driver_Marlin_PowerOff(m_pHandle));
+	}
+	
+	/**
+	* CDriver_Marlin::DisableSteppers - Disables all stepper motors.
+	*/
+	void CDriver_Marlin::DisableSteppers()
+	{
+		CheckError(m_pWrapper->m_WrapperTable.m_Driver_Marlin_DisableSteppers(m_pHandle));
 	}
 
 } // namespace LibMCDriver_Marlin

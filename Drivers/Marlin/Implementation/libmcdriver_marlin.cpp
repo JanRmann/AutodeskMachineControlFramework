@@ -74,7 +74,7 @@ IDriver * CWrapper::CreateDriver(const std::string& sName, const std::string& sT
 	if (sType == "marlin-2.0") {
 		bool bDebug = false;
 		bool bDoFirmwareQuery = false;
-		bool bDisableHoming = true;
+		bool bDisableHoming = false;
 
 		return new CDriver_Marlin(sName, sType, bDoFirmwareQuery, bDisableHoming, bDebug, pDriverEnvironment);
 	}

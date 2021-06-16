@@ -262,6 +262,9 @@ Custom implementation
 		<method name="PowerOff" description="Turn off the high-voltage power supply.">
 		</method>
 
+		<method name="DisableSteppers" description="Disables all stepper motors.">
+		</method>
+
 	</class>
 
 

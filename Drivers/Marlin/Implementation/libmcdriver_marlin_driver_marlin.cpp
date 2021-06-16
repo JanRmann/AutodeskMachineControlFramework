@@ -74,7 +74,13 @@ void CDriver_Marlin::QueryParameters()
 	
 	if (m_pSerialController.get() != nullptr) {
 		double dX, dY, dZ;
-		m_pSerialController->getCurrentPosition(dX, dY, dZ);
+		double X, Y, Z;
+		m_pSerialController->getCurrentPosition(X, Y, Z);
+		m_pDriverEnvironment->SetDoubleParameter("currentx", X);
+		m_pDriverEnvironment->SetDoubleParameter("currenty", Y);
+		m_pDriverEnvironment->SetDoubleParameter("currentz", Z);
+
+		m_pSerialController->getTargetPosition(dX, dY, dZ);
 		m_pDriverEnvironment->SetDoubleParameter("targetx", dX);
 		m_pDriverEnvironment->SetDoubleParameter("targety", dY);
 		m_pDriverEnvironment->SetDoubleParameter("targetz", dZ);
@@ -340,6 +346,14 @@ void CDriver_Marlin::StopIdleHold()
 		throw ELibMCDriver_MarlinInterfaceException(LIBMCDRIVER_MARLIN_ERROR_NOTCONNECTED);
 
 	m_pSerialController->stopIdleHold();
+}
+
+void CDriver_Marlin::DisableSteppers()
+{
+	if (m_pSerialController.get() == nullptr)
+		throw ELibMCDriver_MarlinInterfaceException(LIBMCDRIVER_MARLIN_ERROR_NOTCONNECTED);
+
+	m_pSerialController->disableSteppers();
 }
 
 void CDriver_Marlin::PowerOff()

@@ -432,6 +432,14 @@ typedef LibMCDriver_MarlinResult (*PLibMCDriver_MarlinDriver_Marlin_StopIdleHold
 */
 typedef LibMCDriver_MarlinResult (*PLibMCDriver_MarlinDriver_Marlin_PowerOffPtr) (LibMCDriver_Marlin_Driver_Marlin pDriver_Marlin);
 
+/**
+* Disables all stepper motors.
+*
+* @param[in] pDriver_Marlin - Driver_Marlin instance.
+* @return error code or 0 (success)
+*/
+typedef LibMCDriver_MarlinResult (*PLibMCDriver_MarlinDriver_Marlin_DisableSteppersPtr) (LibMCDriver_Marlin_Driver_Marlin pDriver_Marlin);
+
 /*************************************************************************************************************************
  Global functions
 **************************************************************************************************************************/
@@ -546,6 +554,7 @@ typedef struct {
 	PLibMCDriver_MarlinDriver_Marlin_SetAbsoluteExtrusionPtr m_Driver_Marlin_SetAbsoluteExtrusion;
 	PLibMCDriver_MarlinDriver_Marlin_StopIdleHoldPtr m_Driver_Marlin_StopIdleHold;
 	PLibMCDriver_MarlinDriver_Marlin_PowerOffPtr m_Driver_Marlin_PowerOff;
+	PLibMCDriver_MarlinDriver_Marlin_DisableSteppersPtr m_Driver_Marlin_DisableSteppers;
 	PLibMCDriver_MarlinGetVersionPtr m_GetVersion;
 	PLibMCDriver_MarlinGetLastErrorPtr m_GetLastError;
 	PLibMCDriver_MarlinReleaseInstancePtr m_ReleaseInstance;

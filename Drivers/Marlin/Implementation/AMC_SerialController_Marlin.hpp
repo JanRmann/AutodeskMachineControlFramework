@@ -137,6 +137,8 @@ namespace AMC {
 		bool canReceiveMovement() override;
 		void waitForMovement() override;
 
+
+		void disableSteppers();
 	};
 
 
