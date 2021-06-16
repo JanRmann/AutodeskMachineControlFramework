@@ -335,6 +335,13 @@ public:
 	virtual void Initialize(const std::string & sDeviceName) = 0;
 
 	/**
+	* IDriver_Ximc::MoveToZ - Moving to the Z-position.
+	* @param[in] nPosition - Z-Position.
+	* @param[in] nMicroPostition - Z-Microposition
+	*/
+	virtual void MoveToZ(const LibMCDriver_Ximc_int32 nPosition, const LibMCDriver_Ximc_int32 nMicroPostition) = 0;
+
+	/**
 	* IDriver_Ximc::GetCurrentPosition - Returns the current position of the controller.
 	* @return Position of Axis.
 	*/

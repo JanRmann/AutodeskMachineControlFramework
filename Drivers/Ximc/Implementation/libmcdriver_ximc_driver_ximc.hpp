@@ -60,6 +60,8 @@ private:
 
 protected:
     std::string m_sName;
+    ximc_device_t m_deviceID;
+    ximc_status_t m_status;
     LibMCEnv::PDriverEnvironment m_pDriverEnvironment;
 
     LibMCEnv::PWorkingDirectory m_pWorkingDirectory;
@@ -89,6 +91,8 @@ public:
 	void QueryParameters() override;
 
 	void Initialize(const std::string& sDeviceName) override;
+
+    void MoveToZ(const LibMCDriver_Ximc_int32 nPosition, const LibMCDriver_Ximc_int32 nMicroPostition) override;
 
     LibMCDriver_Ximc_double GetCurrentPosition() override;
 

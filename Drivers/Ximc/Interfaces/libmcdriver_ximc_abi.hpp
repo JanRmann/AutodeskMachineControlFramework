@@ -167,6 +167,16 @@ LIBMCDRIVER_XIMC_DECLSPEC LibMCDriver_XimcResult libmcdriver_ximc_driver_ximc_ge
 LIBMCDRIVER_XIMC_DECLSPEC LibMCDriver_XimcResult libmcdriver_ximc_driver_ximc_initialize(LibMCDriver_Ximc_Driver_Ximc pDriver_Ximc, const char * pDeviceName);
 
 /**
+* Moving to the Z-position.
+*
+* @param[in] pDriver_Ximc - Driver_Ximc instance.
+* @param[in] nPosition - Z-Position.
+* @param[in] nMicroPostition - Z-Microposition
+* @return error code or 0 (success)
+*/
+LIBMCDRIVER_XIMC_DECLSPEC LibMCDriver_XimcResult libmcdriver_ximc_driver_ximc_movetoz(LibMCDriver_Ximc_Driver_Ximc pDriver_Ximc, LibMCDriver_Ximc_int32 nPosition, LibMCDriver_Ximc_int32 nMicroPostition);
+
+/**
 * Returns the current position of the controller.
 *
 * @param[in] pDriver_Ximc - Driver_Ximc instance.

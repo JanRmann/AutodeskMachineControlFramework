@@ -100,7 +100,19 @@ CXimcSDK::CXimcSDK(const std::string& sDLLNameUTF8)
 	this->free_enumerate_devices = (PXimcPtr_free_enumerate_devices)_loadXimcAddress(hLibrary, "free_enumerate_devices");
 	this->get_device_count = (PXimcPtr_get_device_count)_loadXimcAddress(hLibrary, "get_device_count");
 	this->get_device_name = (PXimcPtr_get_device_name)_loadXimcAddress(hLibrary, "get_device_name");
-
+	this->open_device = (PXimcPtr_open_device)_loadXimcAddress(hLibrary, "open_device");
+	this->get_status = (PXimcPtr_get_status)_loadXimcAddress(hLibrary, "get_status");
+	
+	this->get_device_information = (PXimcPtr_get_device_information)_loadXimcAddress(hLibrary, "get_device_information");
+	this->command_move = (PXimcPtr_command_move)_loadXimcAddress(hLibrary, "command_move");
+	/*
+	this->command_zero = (PXimcPtr_command_zero)_loadXimcAddress(hLibrary, "command_zero");
+	this->get_engine_settings = (PXimcPtr_get_engine_settings)_loadXimcAddress(hLibrary, "get_engine_settings");
+	this->get_emf_settings = (PXimcPtr_get_emf_settings)_loadXimcAddress(hLibrary, "get_emf_settings");
+	this->set_engine_advanced_setup = (PXimcPtr_set_engine_advanced_setup)_loadXimcAddress(hLibrary, "set_engine_advanced_setup");
+	this->get_engine_advanced_setup = (PXimcPtr_get_engine_advanced_setup)_loadXimcAddress(hLibrary, "get_engine_advanced_setup");
+	this->set_move_settings = (PXimcPtr_set_move_settings)_loadXimcAddress(hLibrary, "set_move_settings");
+	*/
 	m_LibraryHandle = (void*) hLibrary;
 }
 
@@ -130,5 +142,18 @@ void CXimcSDK::resetFunctionPtrs()
 	free_enumerate_devices = nullptr;
 	get_device_count = nullptr;
 	get_device_name = nullptr;
+	open_device = nullptr;
+	get_status = nullptr;
+	
+	get_device_information = nullptr;
+	command_move = nullptr;
+	/*
+	command_zero = nullptr;
+	get_engine_settings = nullptr;
+	get_emf_settings = nullptr;
+	set_engine_advanced_setup = nullptr;
+	get_engine_advanced_setup = nullptr;
+	set_move_settings = nullptr;
+	*/
 }
 

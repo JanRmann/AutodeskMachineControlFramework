@@ -124,6 +124,11 @@ Custom implementation
 		<method name="Initialize" description="Initializes the Ximc controller.">		
 			<param name="DeviceName" type="string" pass="in" description="Name of Device." />					
 		</method>
+		
+		<method name="MoveToZ" description="Moving to the Z-position.">
+			<param name="Position" type="int32" pass="in" description="Z-Position." />
+			<param name="MicroPostition" type="int32" pass="in" description="Z-Microposition" />
+		</method>
 
 		<method name="GetCurrentPosition" description="Returns the current position of the controller.">		
 			<param name="Position" type="double" pass="return" description="Position of Axis." />

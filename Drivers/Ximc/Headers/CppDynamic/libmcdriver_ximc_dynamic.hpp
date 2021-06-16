@@ -365,6 +365,7 @@ public:
 	inline LibMCDriver_Ximc_uint32 GetDetectedDeviceCount();
 	inline std::string GetDetectedDeviceName(const LibMCDriver_Ximc_uint32 nDeviceIndex);
 	inline void Initialize(const std::string & sDeviceName);
+	inline void MoveToZ(const LibMCDriver_Ximc_int32 nPosition, const LibMCDriver_Ximc_int32 nMicroPostition);
 	inline LibMCDriver_Ximc_double GetCurrentPosition();
 };
 	
@@ -498,6 +499,7 @@ public:
 		pWrapperTable->m_Driver_Ximc_GetDetectedDeviceCount = nullptr;
 		pWrapperTable->m_Driver_Ximc_GetDetectedDeviceName = nullptr;
 		pWrapperTable->m_Driver_Ximc_Initialize = nullptr;
+		pWrapperTable->m_Driver_Ximc_MoveToZ = nullptr;
 		pWrapperTable->m_Driver_Ximc_GetCurrentPosition = nullptr;
 		pWrapperTable->m_GetVersion = nullptr;
 		pWrapperTable->m_GetLastError = nullptr;
@@ -636,6 +638,15 @@ public:
 			return LIBMCDRIVER_XIMC_ERROR_COULDNOTFINDLIBRARYEXPORT;
 		
 		#ifdef _WIN32
+		pWrapperTable->m_Driver_Ximc_MoveToZ = (PLibMCDriver_XimcDriver_Ximc_MoveToZPtr) GetProcAddress(hLibrary, "libmcdriver_ximc_driver_ximc_movetoz");
+		#else // _WIN32
+		pWrapperTable->m_Driver_Ximc_MoveToZ = (PLibMCDriver_XimcDriver_Ximc_MoveToZPtr) dlsym(hLibrary, "libmcdriver_ximc_driver_ximc_movetoz");
+		dlerror();
+		#endif // _WIN32
+		if (pWrapperTable->m_Driver_Ximc_MoveToZ == nullptr)
+			return LIBMCDRIVER_XIMC_ERROR_COULDNOTFINDLIBRARYEXPORT;
+		
+		#ifdef _WIN32
 		pWrapperTable->m_Driver_Ximc_GetCurrentPosition = (PLibMCDriver_XimcDriver_Ximc_GetCurrentPositionPtr) GetProcAddress(hLibrary, "libmcdriver_ximc_driver_ximc_getcurrentposition");
 		#else // _WIN32
 		pWrapperTable->m_Driver_Ximc_GetCurrentPosition = (PLibMCDriver_XimcDriver_Ximc_GetCurrentPositionPtr) dlsym(hLibrary, "libmcdriver_ximc_driver_ximc_getcurrentposition");
@@ -757,6 +768,10 @@ public:
 		
 		eLookupError = (*pLookup)("libmcdriver_ximc_driver_ximc_initialize", (void**)&(pWrapperTable->m_Driver_Ximc_Initialize));
 		if ( (eLookupError != 0) || (pWrapperTable->m_Driver_Ximc_Initialize == nullptr) )
+			return LIBMCDRIVER_XIMC_ERROR_COULDNOTFINDLIBRARYEXPORT;
+		
+		eLookupError = (*pLookup)("libmcdriver_ximc_driver_ximc_movetoz", (void**)&(pWrapperTable->m_Driver_Ximc_MoveToZ));
+		if ( (eLookupError != 0) || (pWrapperTable->m_Driver_Ximc_MoveToZ == nullptr) )
 			return LIBMCDRIVER_XIMC_ERROR_COULDNOTFINDLIBRARYEXPORT;
 		
 		eLookupError = (*pLookup)("libmcdriver_ximc_driver_ximc_getcurrentposition", (void**)&(pWrapperTable->m_Driver_Ximc_GetCurrentPosition));
@@ -926,6 +941,16 @@ public:
 	void CDriver_Ximc::Initialize(const std::string & sDeviceName)
 	{
 		CheckError(m_pWrapper->m_WrapperTable.m_Driver_Ximc_Initialize(m_pHandle, sDeviceName.c_str()));
+	}
+	
+	/**
+	* CDriver_Ximc::MoveToZ - Moving to the Z-position.
+	* @param[in] nPosition - Z-Position.
+	* @param[in] nMicroPostition - Z-Microposition
+	*/
+	void CDriver_Ximc::MoveToZ(const LibMCDriver_Ximc_int32 nPosition, const LibMCDriver_Ximc_int32 nMicroPostition)
+	{
+		CheckError(m_pWrapper->m_WrapperTable.m_Driver_Ximc_MoveToZ(m_pHandle, nPosition, nMicroPostition));
 	}
 	
 	/**

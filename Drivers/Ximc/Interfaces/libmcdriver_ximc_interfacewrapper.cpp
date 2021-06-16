@@ -449,6 +449,30 @@ LibMCDriver_XimcResult libmcdriver_ximc_driver_ximc_initialize(LibMCDriver_Ximc_
 	}
 }
 
+LibMCDriver_XimcResult libmcdriver_ximc_driver_ximc_movetoz(LibMCDriver_Ximc_Driver_Ximc pDriver_Ximc, LibMCDriver_Ximc_int32 nPosition, LibMCDriver_Ximc_int32 nMicroPostition)
+{
+	IBase* pIBaseClass = (IBase *)pDriver_Ximc;
+
+	try {
+		IDriver_Ximc* pIDriver_Ximc = dynamic_cast<IDriver_Ximc*>(pIBaseClass);
+		if (!pIDriver_Ximc)
+			throw ELibMCDriver_XimcInterfaceException(LIBMCDRIVER_XIMC_ERROR_INVALIDCAST);
+		
+		pIDriver_Ximc->MoveToZ(nPosition, nMicroPostition);
+
+		return LIBMCDRIVER_XIMC_SUCCESS;
+	}
+	catch (ELibMCDriver_XimcInterfaceException & Exception) {
+		return handleLibMCDriver_XimcException(pIBaseClass, Exception);
+	}
+	catch (std::exception & StdException) {
+		return handleStdException(pIBaseClass, StdException);
+	}
+	catch (...) {
+		return handleUnhandledException(pIBaseClass);
+	}
+}
+
 LibMCDriver_XimcResult libmcdriver_ximc_driver_ximc_getcurrentposition(LibMCDriver_Ximc_Driver_Ximc pDriver_Ximc, LibMCDriver_Ximc_double * pPosition)
 {
 	IBase* pIBaseClass = (IBase *)pDriver_Ximc;
@@ -508,6 +532,8 @@ LibMCDriver_XimcResult LibMCDriver_Ximc::Impl::LibMCDriver_Ximc_GetProcAddress (
 		*ppProcAddress = (void*) &libmcdriver_ximc_driver_ximc_getdetecteddevicename;
 	if (sProcName == "libmcdriver_ximc_driver_ximc_initialize") 
 		*ppProcAddress = (void*) &libmcdriver_ximc_driver_ximc_initialize;
+	if (sProcName == "libmcdriver_ximc_driver_ximc_movetoz") 
+		*ppProcAddress = (void*) &libmcdriver_ximc_driver_ximc_movetoz;
 	if (sProcName == "libmcdriver_ximc_driver_ximc_getcurrentposition") 
 		*ppProcAddress = (void*) &libmcdriver_ximc_driver_ximc_getcurrentposition;
 	if (sProcName == "libmcdriver_ximc_getversion") 

@@ -47,6 +47,9 @@ CDriver_Ximc::CDriver_Ximc(const std::string& sName, LibMCEnv::PDriverEnvironmen
     : m_sName (sName), m_pDriverEnvironment (pDriverEnvironment)
 {
     pDriverEnvironment->RegisterStringParameter("dllversion", "Version of the XIMC DLL", "unknown");
+    pDriverEnvironment->RegisterIntegerParameter("currentposition", "current position of the z-axis", 0);
+    pDriverEnvironment->RegisterIntegerParameter("currentmicroposition", "current microposition of the z-axis", 0);
+    m_deviceID = -1;
 }
 
 
@@ -94,8 +97,13 @@ void CDriver_Ximc::GetHeaderInformation(std::string& sNameSpace, std::string& sB
 
 void CDriver_Ximc::QueryParameters()
 {
-    
+    if (m_deviceID != -1) {
+        m_pXimcSDK->get_status(m_deviceID, &m_status);
+        m_pDriverEnvironment->SetIntegerParameter("currentposition", m_status.m_CurrentPosition);
+        m_pDriverEnvironment->SetIntegerParameter("currentmicroposition", m_status.m_MicroCurrentPosition);
+    }
 }
+
 
 void CDriver_Ximc::findDevices()
 {
@@ -126,14 +134,25 @@ void CDriver_Ximc::findDevices()
 
 void CDriver_Ximc::Initialize(const std::string& sDeviceName)
 {
+    m_deviceID = m_pXimcSDK->open_device(sDeviceName.c_str ());
+    if (m_deviceID < 0)
+        throw std::runtime_error("could not open device");
 
-
+    m_pXimcSDK->get_status(m_deviceID, &m_status);
+    
+    ximc_device_information_t deviceInformation;
+    m_pXimcSDK->get_device_information(m_deviceID, &deviceInformation);
+    
 }
 
+void CDriver_Ximc::MoveToZ(const LibMCDriver_Ximc_int32 nPosition, const LibMCDriver_Ximc_int32 nMicroPostition)
+{
+    m_pXimcSDK->command_move(m_deviceID, nPosition, nMicroPostition);
+}
 
 LibMCDriver_Ximc_double CDriver_Ximc::GetCurrentPosition()
 {
-    return 5.0;
+    return m_status.m_CurrentPosition;
 }
 
 

@@ -154,6 +154,16 @@ typedef LibMCDriver_XimcResult (*PLibMCDriver_XimcDriver_Ximc_GetDetectedDeviceN
 typedef LibMCDriver_XimcResult (*PLibMCDriver_XimcDriver_Ximc_InitializePtr) (LibMCDriver_Ximc_Driver_Ximc pDriver_Ximc, const char * pDeviceName);
 
 /**
+* Moving to the Z-position.
+*
+* @param[in] pDriver_Ximc - Driver_Ximc instance.
+* @param[in] nPosition - Z-Position.
+* @param[in] nMicroPostition - Z-Microposition
+* @return error code or 0 (success)
+*/
+typedef LibMCDriver_XimcResult (*PLibMCDriver_XimcDriver_Ximc_MoveToZPtr) (LibMCDriver_Ximc_Driver_Ximc pDriver_Ximc, LibMCDriver_Ximc_int32 nPosition, LibMCDriver_Ximc_int32 nMicroPostition);
+
+/**
 * Returns the current position of the controller.
 *
 * @param[in] pDriver_Ximc - Driver_Ximc instance.
@@ -247,6 +257,7 @@ typedef struct {
 	PLibMCDriver_XimcDriver_Ximc_GetDetectedDeviceCountPtr m_Driver_Ximc_GetDetectedDeviceCount;
 	PLibMCDriver_XimcDriver_Ximc_GetDetectedDeviceNamePtr m_Driver_Ximc_GetDetectedDeviceName;
 	PLibMCDriver_XimcDriver_Ximc_InitializePtr m_Driver_Ximc_Initialize;
+	PLibMCDriver_XimcDriver_Ximc_MoveToZPtr m_Driver_Ximc_MoveToZ;
 	PLibMCDriver_XimcDriver_Ximc_GetCurrentPositionPtr m_Driver_Ximc_GetCurrentPosition;
 	PLibMCDriver_XimcGetVersionPtr m_GetVersion;
 	PLibMCDriver_XimcGetLastErrorPtr m_GetLastError;
