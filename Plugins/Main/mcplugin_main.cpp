@@ -32,10 +32,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "libmcplugin_interfaceexception.hpp"
 #include "libmcplugin_state.hpp"
 
-#include "libmcdriver_marlin_dynamic.hpp"
-#include "libmcenv_drivercast.hpp"
-
 using namespace LibMCPlugin::Impl;
+
+#include "libmcenv_drivercast.hpp"
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -43,28 +42,13 @@ using namespace LibMCPlugin::Impl;
 #endif
 
 
-
-/*************************************************************************************************************************
- Import functionality for Driver into current plugin
-**************************************************************************************************************************/
-typedef LibMCDriver_Marlin::PDriver_Marlin PDriver_Marlin;
-typedef LibMCEnv::CDriverCast <LibMCDriver_Marlin::CDriver_Marlin, LibMCDriver_Marlin::CWrapper> PDriverCast_Marlin;
-
-
 /*************************************************************************************************************************
  Class definition of CMainData
 **************************************************************************************************************************/
 class CMainData : public virtual CPluginData {
 protected:
-	// We need to globally store driver wrappers in the plugin
-	PDriverCast_Marlin m_DriverCast_Marlin; 
 
 public:
-
-	PDriver_Marlin acquireMarlinDriver(LibMCEnv::PStateEnvironment pStateEnvironment)
-	{
-		return m_DriverCast_Marlin.acquireDriver(pStateEnvironment, "marlin");
-	}
 
 };
 
@@ -106,6 +90,8 @@ public:
 		pStateEnvironment->SetBoolParameter("jobinfo", "printinprogress", false);
 
 		pStateEnvironment->SetNextState("idle");
+
+
 	}
 
 };
@@ -135,9 +121,6 @@ public:
 			throw ELibMCPluginInterfaceException(LIBMCPLUGIN_ERROR_INVALIDPARAM);
 
 
-		auto pDriver = m_pPluginData->acquireMarlinDriver(pStateEnvironment);
-		pDriver->QueryParameters();
-
 		LibMCEnv::PSignalHandler pHandlerInstance;
 		if (pStateEnvironment->GetBoolParameter("jobinfo", "autostart")) {
 			pStateEnvironment->SetNextState("startprocess");
@@ -149,7 +132,7 @@ public:
 				pStateEnvironment->LogMessage("Starting job..");
 				try {
 					auto sJobName = pHandlerInstance->GetString("jobname");
-					auto	 sJobUUID = pHandlerInstance->GetString("jobuuid");
+					auto sJobUUID = pHandlerInstance->GetString("jobuuid");
 
 					if (sJobName == "")
 						throw std::runtime_error ("empty job name!");
@@ -258,7 +241,6 @@ public:
 		auto sJobUUID = pStateEnvironment->GetStringParameter("jobinfo", "jobuuid");
 		pStateEnvironment->GetBuildJob(sJobUUID)->UnloadToolpath ();
 
-
 		pStateEnvironment->SetBoolParameter("jobinfo", "printinprogress", false);
 		pStateEnvironment->SetNextState("idle");
 
@@ -292,8 +274,24 @@ public:
 
 		auto sJobUUID = pStateEnvironment->GetStringParameter("jobinfo", "jobuuid");
 		auto nCurrentLayer = pStateEnvironment->GetIntegerParameter("jobinfo", "currentlayer");
+		auto nExposureTimeOut = pStateEnvironment->GetIntegerParameter("jobinfo", "exposuretimeout");
 
-		pStateEnvironment->SetNextState("nextlayer");
+		auto pSignal = pStateEnvironment->PrepareSignal("laser", "signal_exposure");
+		pSignal->SetString("jobuuid", sJobUUID);
+		pSignal->SetInteger("layerindex", nCurrentLayer);
+		pSignal->SetInteger("timeout", nExposureTimeOut);
+		pSignal->Trigger();
+
+		if (pSignal->WaitForHandling((uint32_t)nExposureTimeOut)) {
+
+			pStateEnvironment->SetNextState("nextlayer");
+
+		}
+		else {
+
+			pStateEnvironment->SetNextState("fatalerror");
+		}
+
 	}
 };
 
@@ -324,16 +322,29 @@ public:
 		auto sJobUUID = pStateEnvironment->GetStringParameter("jobinfo", "jobuuid");
 		auto nCurrentLayer = pStateEnvironment->GetIntegerParameter("jobinfo", "currentlayer");
 		auto nLayerCount = pStateEnvironment->GetIntegerParameter("jobinfo", "layercount");
+		auto nRecoatingTimeOut = pStateEnvironment->GetIntegerParameter("jobinfo", "recoatingtimeout");
 
-		pStateEnvironment->LogMessage("Advancing to layer #" + std::to_string(nCurrentLayer + 1) + "...");
-		pStateEnvironment->SetIntegerParameter("jobinfo", "currentlayer", nCurrentLayer + 1);
+		auto pSignal = pStateEnvironment->PrepareSignal("mechanics", "signal_recoatlayer");
+		pSignal->Trigger();
 
-		// TODO: check condition
-		if (nCurrentLayer + 1 < nLayerCount) {
-			pStateEnvironment->SetNextState("drawlayer");
-		} else {
-			pStateEnvironment->SetNextState("finishprocess");
+		if (pSignal->WaitForHandling((uint32_t) nRecoatingTimeOut)) {
+
+			pStateEnvironment->LogMessage("Advancing to layer #" + std::to_string(nCurrentLayer + 1) + "...");
+			pStateEnvironment->SetIntegerParameter("jobinfo", "currentlayer", nCurrentLayer + 1);
+
+			if (nCurrentLayer + 1 < nLayerCount) {
+				pStateEnvironment->SetNextState("drawlayer");
+			}
+			else {
+				pStateEnvironment->SetNextState("finishprocess");
+			}
+
 		}
+		else {
+
+			pStateEnvironment->SetNextState("fatalerror");
+		}
+		
 	}
 
 };

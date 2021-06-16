@@ -3,11 +3,21 @@
 
   <services threadcount="32" />
 
-
   <driver name="marlin" library="driver_marlin" type="marlin-2.0" />
+  <driver name="scanlab" library="driver_scanlab" type="scanlab-rtc6" />
+  <driver name="ximc" library="driver_ximc" type="ximc" />
+  <driver name="optris" library="driver_optris" type="optris" />
   
-    <statemachine name="demo" description="Demo System" initstate="init" failedstate="fatalerror" library="plugin_demo">
-  	 	  		  
+  <statemachine name="main" description="Main System" initstate="init" failedstate="fatalerror" library="plugin_main">
+	 
+	  <parametergroup name="recoater" description="Recoater parameter">
+		  <parameter name="dist" description="Distance of recoater" default="50" type="double"/>
+		  <parameter name="mult" description="Multiplier for roller distance" default="2" type="double"/>
+		  <parameter name="speed" description="Recoater speed" default="50" type="double"/>
+		  <parameter name="speedr" description="Roller speed" default="100" type="double"/>
+	  </parametergroup>	 
+	  
+	  
   	  <parametergroup name="jobinfo" description="Job Information">
   		<parameter name="jobname" description="Job Name" default="Job Name" type="string" />
   		<parameter name="jobuuid" description="Job UUID" default="00000000-0000-0000-0000-000000000000" type="string" />
@@ -15,6 +25,8 @@
   		<parameter name="currentlayer" description="Current Layer" default="0" type="int" />
   		<parameter name="autostart" description="Automatically start job after init" default="0" type="bool" />
   		<parameter name="printinprogress" description="Print is in progress" default="0" type="bool" />
+  		<parameter name="recoatingtimeout" description="Recoating Timeout" default="200000" type="int" />
+		<parameter name="exposuretimeout" description="Exposure Timeout" default="200000" type="int" />	
   	  </parametergroup>
 
 	  
@@ -61,21 +73,147 @@
     
   	  
     </statemachine>
+
+
+    <statemachine name="laser" description="Laser System" initstate="init" failedstate="fatalerror" library="plugin_laser">
+
+  	  <parametergroup name="cardconfig" description="Card Config">
+  		<parameter name="ipaddress" description="IP Address" default="192.168.60.1" type="string" />
+  		<parameter name="netmask" description="Netmask" default="255.255.255.0" type="string" />
+  		<parameter name="timeout" description="Connection timeout" default="1000" type="int" />
+  		<parameter name="serial" description="Serial" default="326070" type="int" />
+		<parameter name="maxlaserpower" description="Max. laser power (W)" default="2000" type="double" />
+  		<parameter name="laserondelay" description="Laser On Delay in microseconds" default="100" type="double" />
+  		<parameter name="laseroffdelay" description="Laser Off Delay in microseconds" default="100" type="double" />
+  		<parameter name="markdelay" description="Mark Delay in microseconds" default="570" type="double" />
+  		<parameter name="jumpdelay" description="Jump Delay in microseconds" default="1400" type="double" />
+  		<parameter name="polygondelay" description="Polygon Delay in microseconds" default="280" type="double" />
+  	  </parametergroup>
+		
+	<parametergroup name="correction" description="Scanlab Correction Data">
+  		<parameter name="resourcename" description="Correction resource name" default="correctionfile" type="string" />
+  		<parameter name="tableindex" description="Correction table index" default="1" type="int" />
+  		<parameter name="dimension" description="Correction file dimension" default="3" type="int" />
+  		<parameter name="tablenumbera" description="Table number head A" default="1" type="int" />
+  		<parameter name="tablenumberb" description="Table number head B" default="0" type="int" />
+  	  </parametergroup>
+
+
+  	  <signaldefinition name="signal_exposure">
+  		<parameter name="jobuuid" type="string" />
+   		<parameter name="layerindex" type="int" />
+   		<parameter name="timeout" type="int" />
+  		<result name="success" type="bool" />
+  	  </signaldefinition>
+
+  	  <state name="init" repeatdelay="100">
+  			<outstate target="idle" />
+  	  </state>
   
-  	<userinterface appname="Autodesk Machine Control Framework" copyright="2020 Autodesk Inc." mainpage="main" library="plugin_userinterface">
+  	  <state name="idle" repeatdelay="50">
+  			<outstate target="idle" />
+  			<outstate target="exposure" />
+  	  </state>
+
+  	  <state name="exposure" repeatdelay="50">
+  			<outstate target="idle" />
+  	  </state>
+	
+  	  <state name="fatalerror" repeatdelay="5000">	  
+  			<outstate target="init" />
+  			<outstate target="fatalerror" />
+  	  </state>
+	
+    </statemachine>
+
+
+    <statemachine name="mechanics" description="Mechanics System" initstate="init" failedstate="fatalerror" library="plugin_mechanics">
+
+  	  <parametergroup name="connectionsettings" description="Connection Settings">
+  		<parameter name="comport" description="COM Port" default="COM3" type="string" />
+  		<parameter name="baudrate" description="Baudrate" default="250000" type="int" />
+  		<parameter name="statusupdateinterval" description="Status Update Interval [ms]" default="100" type="int" />
+  		<parameter name="connecttimeout" description="Connect Timeout [ms]" default="3000" type="int" />
+  	  </parametergroup>
+
+	  <parametergroup name="recoater" description="Recoater parameter">
+		<derivedparameter name="dist" statemachine="main" group="recoater" parameter="dist"/>
+		<derivedparameter name="mult" statemachine="main" group="recoater" parameter="mult"/>
+		<derivedparameter name="speed" statemachine="main" group="recoater" parameter="speed"/>
+		<derivedparameter name="speedr" statemachine="main" group="recoater" parameter="speedr"/>
+	  </parametergroup>
+
+		<driverparametergroup name="connectionstate" description="Connection State Data" driver="marlin" />
+		<driverparametergroup name="ximcstate" description="State of the z-axis" driver="ximc" />
+
+
+	  <signaldefinition name="signal_recoatlayer">
+  			<result name="success" type="bool" />
+  	  </signaldefinition>
+
+	  <signaldefinition name="signal_movex">
+			<parameter name = "deltax" type = "double"/>
+			<result name="success" type="bool" />
+	  </signaldefinition>
+
+		<signaldefinition name="signal_movey">
+			<parameter name = "deltay" type = "double"/>
+			<result name="success" type="bool" />
+		</signaldefinition>
+
+  	  <state name="init" repeatdelay="100">
+  			<outstate target="idle" />
+  	  </state>
+  
+  	  <state name="idle" repeatdelay="50">
+  			<outstate target="idle" />
+  			<outstate target="recoating" />
+		    <outstate target="movingx" />
+		    <outstate target="movingy" />
+  	  </state>
+
+  	  <state name="recoating" repeatdelay="50">
+  			<outstate target="idle" />
+  	  </state>
+		
+	  <state name="movingx" repeatdelay="50">
+  			<outstate target="idle" />
+  	  </state>
+
+	  <state name="movingy" repeatdelay="50">
+			<outstate target="idle" />
+	  </state>
+	  	
+  	  <state name="fatalerror" repeatdelay="5000">	  
+  			<outstate target="init" />
+  			<outstate target="fatalerror" />
+  	  </state>
+	
+    </statemachine>
+
+  
+  	<userinterface appname="iwb Machine 1" copyright="2021 iwb" 
+				mainpage="main" library="plugin_userinterface">
   
 		<logo resource="ui_logo" aspectratio="2.5" />
 		
 		<page name="main">
 
-			<content name="infobox" title="Welcome to AMdroid" headline="Autodesk Machine Control Framework" subtitle="Make Additive Manufacturing accessible">
-				<paragraph text="Our colors unite and enrich the Autodesk experience and solidify our brand." />
-				<image resource="ui_logo" aspectratio="4.5" />
-				<paragraph text="The Autodesk primary color is derived from our logo. It is where we start when introducing color into a communication. Our secondary palette gives you additional color options to round out your creative vision." />						
+			<content name="infobox" title="Welcome to AMdroid" headline="Autodesk Machine Control Framework" 
+						subtitle="Make Additive Manufacturing accessible">
+										
+				<paragraph text="This sample configuration serves as Laser Powderbed Fusion demo implementation." />
+				
+				<paragraph text="Autodesk Machine Control Framework is changing the commercial landscape of industrial 
+						additive manufacturing machines with providing a production-ready open source platform that offers 
+						enough features to build a state of the art machine with almost zero effort." />	
+				<image resource="opensource" aspectratio="8" />
+				
+				<paragraph text="Based on open standards and liberal open source licenses, it will change how machines are 
+								developed and deployed in the field." />	
 				
 				<upload class="build" caption="Select 3MF files to upload" successpage="buildinfo" />
 				
-			
 				<buttongroup>
 					<button caption="Build Library" targetpage="buildlist" />
 					<button caption="System Status" targetpage="systemstatus" />
@@ -89,7 +227,9 @@
 		
 			<content name="buildlibrary" title="Build Library" subtitle="Make Additive Manufacturing accessible">
 				<paragraph text="Our colors unite and enrich the Autodesk experience and solidify our brand." />
-				<paragraph text="The Autodesk primary color is derived from our logo. It is where we start when introducing color into a communication. Our secondary palette gives you additional color options to round out your creative vision." />						
+				<paragraph text="The Autodesk primary color is derived from our logo. It is where we start when introducing 
+								color into a communication. Our secondary palette gives you additional color options to round 
+								out your creative vision." />						
 				
 				<upload class="build" caption="Drag 3MF files here to upload" successpage="buildinfo" />
 				
@@ -127,14 +267,52 @@
 				<paragraph text="This is the current machine state." />						
 				
 				<parameterlist loadingtext="Loading parameters">
-					<entry statemachine="demo" group="jobinfo" />
+					<entry statemachine="main" group="jobinfo" />
+					<entry statemachine="mechanics" group="connectionsettings" />
+					<entry statemachine="mechanics" group="connectionstate" />
+					<entry statemachine="mechanics" group="ximcstate" />
+										
 				</parameterlist>	
 			</content>					
 			
 		</page>
 
+		
 		<page name="manualcontrol">
+			<content name="manualcontrol" title="Manual Control" >
+				
+				<paragraph text="On this page the machine can be controlled manually." />
+				
+				<form name="form2">
+					<edit caption="Set recoater speed [mm/s]" text="" />
+					<edit caption="Set distance of recoater [mm]" text="" />
+					<edit caption="Set roller speed [mm/s]" text="" />
+				</form>
+					
+				<buttongroup>
+					<button caption="Save" />
+					<button caption="Cancel" />
+				</buttongroup>
+				
+				<parameterlist loadingtext="Loading parameters">
+					<entry statemachine="main" group="recoater" />
+				</parameterlist>
+				
+				<buttongroup>
+					<button caption="Recoat" event="recoat" />
+				</buttongroup>
 
+				<buttongroup>
+					<button caption="Move Y10 Right" event="movey10right" />
+					<button caption="Move X10 Right" event="movex10right" />
+					<button caption="Move X100 Right" event="movex100right" />
+				</buttongroup>
+
+				<buttongroup>
+					<button caption="Test" event="davestest" />
+				</buttongroup>
+
+			</content>
 		</page>
 
 
@@ -161,16 +339,16 @@
 		</page>
 
 		<menu>
-			<item id="home" icon="mdi-apps" caption="Home" targetpage="main"/>
+			<item id="home" icon="mdi-home" caption="Home" targetpage="main"/>
 			<item id="build" icon="mdi-factory" caption="Build Library" targetpage="buildlist"/>
-			<item id="systemstatus" icon="mdi-apps" caption="System Status" targetpage="systemstatus"/>
-			<item id="settings" icon="mdi-settings" caption="Manual Control" targetpage="manualcontrol"/>
+			<item id="systemstatus" icon="mdi-playlist-check" caption="System Status" targetpage="systemstatus"/>
+			<item id="manualcontrol" icon="mdi-arrow-expand-all" caption="Manual Control" targetpage="manualcontrol"/>
 			<item id="settings" icon="mdi-settings" caption="Settings" targetpage="settings"/>
 
 		</menu>
 
 		<toolbar>
-			<item id="home" icon="mdi-apps" caption="Home" targetpage="main"/>
+			<item id="home" icon="mdi-home" caption="Home" targetpage="main"/>
 			<item id="build" icon="mdi-factory" caption="Builds" targetpage="buildlist"/>
 
 		</toolbar>

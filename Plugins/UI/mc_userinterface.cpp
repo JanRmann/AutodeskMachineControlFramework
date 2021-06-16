@@ -42,7 +42,7 @@ using namespace LibMCUI::Impl;
 
 
 /*************************************************************************************************************************
- Class declaration of CEventHandler
+ Class declaration of CEvent_StartBuild
 **************************************************************************************************************************/
 
 class CEvent_StartBuild : public virtual CEvent {
@@ -56,26 +56,144 @@ public:
 
 	void Handle(LibMCEnv::PUIEnvironment pUIEnvironment) override
 	{
-		if (pUIEnvironment.get() == nullptr)
-			throw ELibMCUIInterfaceException(LIBMCUI_ERROR_INVALIDPARAM);
 
 		auto sJobUUID = pUIEnvironment->GetEventContext();
-		auto pSignal = pUIEnvironment->PrepareSignal("demo", "signal_startjob");
+		auto pSignal = pUIEnvironment->PrepareSignal("main", "signal_startjob");
 		pSignal->SetString("jobuuid", sJobUUID);
-		pSignal->SetString("jobname", "testjob");
+		pSignal->SetString("jobname", "Job");
 		pSignal->Trigger();
 
 	}
 
 };
 
+/*************************************************************************************************************************
+ Class declaration of CEvent_Recoat
+**************************************************************************************************************************/
+
+class CEvent_Recoat : public virtual CEvent {
+
+public:
+
+	static std::string getEventName()
+	{
+		return "recoat";
+	}
+
+	void Handle(LibMCEnv::PUIEnvironment pUIEnvironment) override
+	{
+		auto pSignal = pUIEnvironment->PrepareSignal("mechanics", "signal_recoatlayer");
+		pSignal->Trigger();
+	}
+
+};
+
+/*************************************************************************************************************************
+ Class declaration of CEvent_MoveX10Right
+**************************************************************************************************************************/
+
+class CEvent_MoveX10Right : public virtual CEvent {
+
+public:
+
+	static std::string getEventName()
+	{
+		return "movex10right";
+	}
+
+	void Handle(LibMCEnv::PUIEnvironment pUIEnvironment) override
+	{
+		auto pSignal = pUIEnvironment->PrepareSignal("mechanics", "signal_movex");
+		pSignal->SetDouble("deltax", 10);
+		pSignal->Trigger();
+	}
+
+};
+
+/*************************************************************************************************************************
+ Class declaration of CEvent_MoveX100Right
+**************************************************************************************************************************/
+
+class CEvent_MoveX100Right : public virtual CEvent {
+
+public:
+
+	static std::string getEventName()
+	{
+		return "movex100right";
+	}
+
+	void Handle(LibMCEnv::PUIEnvironment pUIEnvironment) override
+	{
+		auto pSignal = pUIEnvironment->PrepareSignal("mechanics", "signal_movex");
+		pSignal->SetDouble("deltax", 100);
+		pSignal->Trigger();
+	}
+
+};
+
+/*************************************************************************************************************************
+ Class declaration of CEvent_MoveY10Right
+**************************************************************************************************************************/
+
+class CEvent_MoveY10Right : public virtual CEvent {
+
+public:
+
+	static std::string getEventName()
+	{
+		return "movey10right";
+	}
+
+	void Handle(LibMCEnv::PUIEnvironment pUIEnvironment) override
+	{
+		auto pSignal = pUIEnvironment->PrepareSignal("mechanics", "signal_movey");
+		pSignal->SetDouble("deltay", 10);
+		pSignal->Trigger();
+	}
+
+};
+
+/*************************************************************************************************************************
+ Class declaration of CEvent_DavesTest
+**************************************************************************************************************************/
+
+class CEvent_DavesTest : public virtual CEvent {
+
+public:
+
+	static std::string getEventName()
+	{
+		return "davestest";
+	}
+
+	void Handle(LibMCEnv::PUIEnvironment pUIEnvironment) override
+	{
+		
+		auto pSignal = pUIEnvironment->PrepareSignal("mechanics", "signal_movey");
+		double supervar;
+		supervar = rand() % 100;
+		pSignal->SetDouble("deltay", supervar);
+		pSignal->Trigger();
+	}
+
+};
 
 IEvent* CEventHandler::CreateEvent(const std::string& sEventName, LibMCEnv::PUIEnvironment pUIEnvironment)
 {
 	IEvent* pEventInstance = nullptr;
 	if (createEventInstanceByName<CEvent_StartBuild>(sEventName, pEventInstance))
 		return pEventInstance;
-
+	else if (createEventInstanceByName<CEvent_Recoat>(sEventName, pEventInstance))
+		return pEventInstance;
+	else if (createEventInstanceByName<CEvent_MoveX10Right>(sEventName, pEventInstance))
+		return pEventInstance;
+	else if (createEventInstanceByName<CEvent_MoveX100Right>(sEventName, pEventInstance))
+		return pEventInstance;
+	else if (createEventInstanceByName<CEvent_MoveY10Right>(sEventName, pEventInstance))
+		return pEventInstance;
+	else if (createEventInstanceByName<CEvent_DavesTest>(sEventName, pEventInstance))
+		return pEventInstance;
 	throw ELibMCUIInterfaceException(LIBMCUI_ERROR_INVALIDEVENTNAME);
 }
 
